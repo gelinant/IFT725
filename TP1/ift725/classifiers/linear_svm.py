@@ -34,6 +34,33 @@ def svm_naive_loss_function(W, X, y, reg):
     #  terme de régularisation L2 : reg*||w||^2                                 #
     #############################################################################
 
+    #https://ljvmiranda921.github.io/notebook/2017/02/11/multiclass-svm/
+
+    current_loss = 0
+
+    for i in range(X.shape[0]):
+        # Produit scalaire entre W et X
+        predict = np.dot(np.transpose(W), X[i])
+        
+        for j in range(predict.size):
+            if j != y[i]:
+                current_loss = 1 + predict[j] - predict[y[i]] + reg * np.linalg.norm(W[i])**2
+
+                if current_loss > 0:
+                    # Loss + terme de regularisation L2
+                    loss += current_loss
+
+                    # Gradient                   
+                    dW[:,y[i]] -= X[i,:]
+                    dW[:,j]    += X[i,:]
+
+    # Moyenne pour l'ensemble des exemples
+    loss = loss / X.shape[0]
+    dW = dW / X.shape[0]
+
+    #print("loss :", loss)
+    #print("dW :", dW)
+
     #############################################################################
     #                            FIN DE VOTRE CODE                              #
     #############################################################################
