@@ -50,8 +50,10 @@ def svm_naive_loss_function(W, X, y, reg):
                     # Loss + terme de regularisation L2
                     loss += current_loss
 
-                    # Gradient                   
+                    # Gradient
+                    # dWyi = - I(WjT.Xi - WyiT.Xi + 1 > 0).Xi                
                     dW[:,y[i]] -= X[i,:]
+                    # dWj = I(WjT.Xi - WyiT.Xi + 1 > 0).Xi
                     dW[:,j]    += X[i,:]
 
     # Moyenne pour l'ensemble des exemples
@@ -82,7 +84,26 @@ def svm_vectorized_loss_function(W, X, y, reg):
     # Veuillez mettre le résultat dans la variable "loss".                      #
     # NOTE : Cette fonction ne doit contenir aucune boucle                      #
     #############################################################################
-    loss = 0.0
+
+    # Produits scalaires entre W et X
+    list_predict = np.dot(np.transpose(W), np.transpose(X))
+    #list_predict = np.dot(X, W)
+    
+    #print(list_predict.shape)
+    #print(np.arange(X.shape[0]))
+
+    list_current_loss = 1 + list_predict - list_predict[y, np.arange(X.shape[0])] + reg * np.linalg.norm(W)**2
+    
+    # On enleve les cas ou j = y[i] comme precedemment
+    list_current_loss[y, np.arange(X.shape[0])] = 0
+    # On enleve les cas ou c'est inferieur a 0 comme precedemment
+    list_current_loss = np.where(list_current_loss > 0, list_current_loss, 0)
+    
+    # Loss + terme de regularisation L2
+    loss = np.sum(list_current_loss)
+
+    # Moyenne pour l'ensemble des exemples
+    loss = loss / X.shape[0]
 
     #############################################################################
     #                            FIN DE VOTRE CODE                              #
@@ -98,7 +119,22 @@ def svm_vectorized_loss_function(W, X, y, reg):
     # avez utilisées pour calculer la perte.                                    #
     #############################################################################
 
-    dW = dW*0
+    # On change la liste en liste binaire : 1 si > 0, 0 sinon
+    list_current_loss = np.where(list_current_loss > 0, 1, 0)
+
+    # On recupere le nombre de 1 pour chaque ligne (donnees au dela de la "marge")
+    list_nb_ones = np.sum(list_current_loss, axis=0)
+    
+    # On soustrait la valeur a l'etiquette de la ligne correspondante
+    list_current_loss[y, np.arange(X.shape[0])] -= list_nb_ones
+
+    #print(list_current_loss.shape)
+
+    # Gradient
+    dW = np.dot(np.transpose(X), np.transpose(list_current_loss))
+
+    # Moyenne pour l'ensemble des exemples
+    dW = dW / X.shape[0]
 
     #############################################################################
     #                            FIN DE VOTRE CODE                              #
