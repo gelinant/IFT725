@@ -44,17 +44,20 @@ def svm_naive_loss_function(W, X, y, reg):
         
         for j in range(predict.size):
             if j != y[i]:
-                current_loss = 1 + predict[j] - predict[y[i]] + reg * np.linalg.norm(W[i])**2
+                current_loss = np.max([0, 1 + predict[j] - predict[y[i]]])
 
-                if current_loss > 0:
-                    # Loss + terme de regularisation L2
-                    loss += current_loss
+                # Loss + terme de regularisation L2
+                loss += current_loss + reg * np.linalg.norm(W[i])**2
 
-                    # Gradient
-                    # dWyi = - I(WjT.Xi - WyiT.Xi + 1 > 0).Xi                
-                    dW[:,y[i]] -= X[i,:]
-                    # dWj = I(WjT.Xi - WyiT.Xi + 1 > 0).Xi
-                    dW[:,j]    += X[i,:]
+                # On change la valeur en valeur binaire : 1 si > 0, 0 sinon
+                if current_loss != 0:
+                    current_loss = 1
+
+                # Gradient
+                # dWyi = - I(WjT.Xi - WyiT.Xi + 1 > 0).Xi avec I(...) = 1 si ... > 0
+                dW[:,y[i]] -= current_loss * X[i]
+                # dWj = I(WjT.Xi - WyiT.Xi + 1 > 0).Xi avec I(...) = 1 si ... > 0
+                dW[:,j]    += current_loss * X[i]
 
     # Moyenne pour l'ensemble des exemples
     loss = loss / X.shape[0]
@@ -87,7 +90,6 @@ def svm_vectorized_loss_function(W, X, y, reg):
 
     # Produits scalaires entre W et X
     list_predict = np.dot(np.transpose(W), np.transpose(X))
-    #list_predict = np.dot(X, W)
     
     #print(list_predict.shape)
     #print(np.arange(X.shape[0]))
