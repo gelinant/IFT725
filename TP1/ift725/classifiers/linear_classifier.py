@@ -56,6 +56,17 @@ class LinearClassifier(object):
             # l'échantillonnage sans remplacement.                                  #
             #########################################################################
 
+            # Liste d'index genere aleatoirement
+            list_index = np.random.choice(X.shape[0], batch_size)
+
+            # Recupere les donnees issues de X et y
+            X_batch = X[list_index, :]
+            y_batch = y[list_index]
+
+            #print("list_index :", list_index.shape)
+            #print("X_batch :", X_batch.shape)
+            #print("y_batch :", y_batch.shape)
+
             #########################################################################
             #                      FIN DE VOTRE CODE                                #
             #########################################################################
@@ -69,6 +80,8 @@ class LinearClassifier(object):
             # TODO: Mise à jour des poids en utilisant le gradient et la vitesse    #
             #  d'apprentissagethe weights using the gradient and the learning rate. #
             #########################################################################
+
+            self.W += - learning_rate * grad
 
             #########################################################################
             #                      FIN DE VOTRE CODE                                #
@@ -97,6 +110,12 @@ class LinearClassifier(object):
         # TODO: Implémentez cette fonction.                                       #
         # Stockez les étiquettes prédites dans "labels_pred".                     #
         ###########################################################################
+
+        print(np.dot(self.W, X).shape)
+
+        labels_pred = np.max(np.dot(self.W, X))
+
+        print("label_pred :", labels_pred.shape)
 
         ###########################################################################
         #                          FIN DE VOTRE CODE                              #
