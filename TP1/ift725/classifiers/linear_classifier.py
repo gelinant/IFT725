@@ -111,11 +111,13 @@ class LinearClassifier(object):
         # Stockez les étiquettes prédites dans "labels_pred".                     #
         ###########################################################################
 
-        print(np.dot(self.W, X).shape)
+        predict = np.dot(X, self.W)
+        #print("predict :", predict.shape)
 
-        labels_pred = np.max(np.dot(self.W, X))
+        for i in range(X.shape[0]):
+            labels_pred[i] = list(predict[i,:]).index(np.max(predict[i,:]))
 
-        print("label_pred :", labels_pred.shape)
+        #print("label_pred :", labels_pred.shape)
 
         ###########################################################################
         #                          FIN DE VOTRE CODE                              #
