@@ -103,11 +103,16 @@ def softmax_vectorized_loss_function(W, X, y, reg):
     loss = loss * 0
     dW = dW * 0
 
-    predict = np.dot(np.transpose(W), X)
-    SM = np.exp(predict) / np.sum(np.exp(predict))
-    
-    # tab_ = np.where(SM[y[i]]
-    # loss =  np.log() + reg 
+    predict = np.dot(X,W)
+    SM = np.exp(predict) / np.sum(np.exp(predict),axis=0)
+    loss = np.sum(- np.log(SM[y])) + reg 
+    loss = loss / X.shape[0]
+
+    dW = np.transpose(np.dot(np.transpose(SM) - y,X))
+
+
+    print(loss)
+
 
 
     #############################################################################
