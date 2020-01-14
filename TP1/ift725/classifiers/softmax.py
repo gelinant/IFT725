@@ -47,10 +47,11 @@ def softmax_naive_loss_function(W, X, y, reg):
       predict = np.dot(np.transpose(W), X[i])
       C = predict.size
 
-      SM = np.array(C)
+      SM = np.array([])
       for j in range(C):
         predict_SM = np.exp(predict[j])/np.sum(np.exp(predict))
         SM = np.append(SM , predict_SM)
+        #print(SM)
 
         # W et dW ont D dim en sortie donc on multiplie par le X en cours d'analyse pour que ca donne le bon 
         dW[:,j] += (predict_SM - y[i])*X[i]
