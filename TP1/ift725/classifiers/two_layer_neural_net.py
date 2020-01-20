@@ -82,7 +82,21 @@ class TwoLayerNeuralNet(object):
         # tableau de la forme (N, C).                                               #
         #############################################################################
 
-        #scores = ...
+        #print("X :", X.shape)
+        #print("W1 :", Weights1.shape, "| b1 :", biases1.shape)
+        #print("W2 :", Weights2.shape, "| b2 :", biases2.shape)
+        
+        # Couche cachée
+        layer_1 = biases1 + np.dot(X, Weights1)
+        relu_1  = np.where(layer_1 < 0, 0, layer_1)
+        #print("layer_1 :", layer_1.shape)
+
+        # Couche de sortie
+        layer_2 = biases2 + np.dot(relu_1, Weights2)
+        #print("layer_2 :", layer_2.shape)
+
+        scores = layer_2
+
         #############################################################################
         #                             FIN DE VOTRE CODE                             #
         #############################################################################
@@ -101,7 +115,22 @@ class TwoLayerNeuralNet(object):
         # résultat dans la variable "loss", qui doit être une valeur scalaire.      #
         # NOTE : votre code doit être linéarisé et donc ne contenir AUCUNE boucle   #
         #############################################################################
-        loss = loss*0
+
+        # Softmax
+        exps = np.exp(scores)
+        softmax = exps / np.sum(exps, axis=1)[:,np.newaxis]
+
+        print("exps :", exps)
+        print("somme :", np.sum(exps, axis=1)[:,np.newaxis])
+        print("softmax :", softmax)
+        print("y :", y)
+        print(softmax[np.arange(y.shape[0]),y])
+        print(- np.log(softmax[np.arange(y.shape[0]),y]))
+
+        # Cross-entropy loss + terme de regularisation
+        loss = np.sum(- np.log(softmax[np.arange(y.shape[0]), y]) + reg) / y.shape[0]
+        
+        print("loss :", loss)
 
         #############################################################################
         #                             FIN DE VOTRE CODE                             #
