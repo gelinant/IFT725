@@ -39,7 +39,33 @@ def softmax_naive_loss_function(W, X, y, reg):
     # d'un échantillon.                                                         #
     #############################################################################
     loss = loss*0
-    dW = dW*0
+    #dW = dW*0
+
+    for i in range(X.shape[0]):
+      # On calcule d'abbord le w^T.X pour l'ensemble de donnée en cours de traitement
+      # On un vexteur en sortie de taille C (le nombre de classes)
+      predict = np.dot(np.transpose(W), X[i])
+      C = predict.size
+
+      SM = np.array([])
+      for j in range(C):
+        predict_SM = np.exp(predict[j])/np.sum(np.exp(predict))
+        SM = np.append(SM , predict_SM)
+        #print(SM)
+
+        # W et dW ont D dim en sortie donc on multiplie par le X en cours d'analyse pour que ca donne le bon 
+        dW[:,j] += (predict_SM - y[i])*X[i]
+
+      #SM = SM - np.max(SM)
+
+      # On a maintenant calculer la loss de la donnée étudiée
+      # On va ensuite chercher la bonne valeur theorique pour cette donnée avec y[i]
+      # Comme c'est la seule qui sera non nulle, 
+      # on va chercher directement le log de la valeur de la classe qui aurait du etre trouvée
+      loss += - np.log(SM[y[i]]) + reg 
+
+    loss = loss / X.shape[0]
+    dW = dW / X.shape[0]
 
     #############################################################################
     #                         FIN DE VOTRE CODE                                 #
@@ -77,6 +103,18 @@ def softmax_vectorized_loss_function(W, X, y, reg):
     #############################################################################
     loss = loss * 0
     dW = dW * 0
+
+    predict = np.dot(X,W)
+    SM = np.exp(predict) / np.sum(np.exp(predict),axis=0)
+    loss = np.sum(- np.log(SM[y])) + reg 
+    loss = loss / X.shape[0]
+
+    dW = np.transpose(np.dot(np.transpose(SM) - y,X))
+
+
+    print(loss)
+
+
 
     #############################################################################
     #                         FIN DE VOTRE CODE                                 #
