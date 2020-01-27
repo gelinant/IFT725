@@ -87,12 +87,13 @@ class TwoLayerNeuralNet(object):
         #print("W2 :", Weights2.shape, "| b2 :", biases2.shape)
         
         # Couche cachée
-        layer_1 = biases1 + np.dot(X, Weights1)
+        layer_1 = np.dot(X, Weights1) + biases1
         relu_1  = np.where(layer_1 < 0, 0, layer_1)
-        #print("layer_1 :", layer_1.shape)
+        #print("layer_1 :", layer_1)
+        #print("relu_1 :", relu_1)
 
         # Couche de sortie
-        layer_2 = biases2 + np.dot(relu_1, Weights2)
+        layer_2 = np.dot(relu_1, Weights2) + biases2
         #print("layer_2 :", layer_2.shape)
 
         scores = layer_2
@@ -120,17 +121,17 @@ class TwoLayerNeuralNet(object):
         exps = np.exp(scores)
         softmax = exps / np.sum(exps, axis=1)[:,np.newaxis]
 
-        print("exps :", exps)
-        print("somme :", np.sum(exps, axis=1)[:,np.newaxis])
-        print("softmax :", softmax)
-        print("y :", y)
-        print(softmax[np.arange(y.shape[0]),y])
-        print(- np.log(softmax[np.arange(y.shape[0]),y]))
+        #print("exps :", exps)
+        #print("somme :", np.sum(exps, axis=1)[:,np.newaxis])
+        #print("softmax :", softmax)
 
         # Cross-entropy loss + terme de regularisation
-        loss = np.sum(- np.log(softmax[np.arange(y.shape[0]), y]) + reg) / y.shape[0]
+        reg_l2 = reg * (np.linalg.norm(Weights1)**2 + np.linalg.norm(biases1)**2 + np.linalg.norm(Weights2)**2 + np.linalg.norm(biases2)**2)
         
-        print("loss :", loss)
+        loss = - np.sum(np.log(softmax[np.arange(y.shape[0]), y])) / y.shape[0] + reg_l2 
+        
+        #print("terme de regularisation :", reg_l2)
+        #print("loss :", loss)
 
         #############################################################################
         #                             FIN DE VOTRE CODE                             #
@@ -152,11 +153,35 @@ class TwoLayerNeuralNet(object):
         #   f1  pre-activation of the 1st layer (N, H)
         #   a1  activation of the 1st layer (N, H)
 
+        #print("X :", X.shape)
+        #print("W1 :", Weights1.shape, "| b1 :", biases1.shape)
+        #print("W2 :", Weights2.shape, "| b2 :", biases2.shape)
+        #print("layer_1 :", layer_1.shape, "| layer_2 :", layer_2.shape)
+        #print(y)
 
-        grads['W1'] = 0
-        grads['W2'] = 0
-        grads['b1'] = 0
-        grads['b2'] = 0
+        # Vecteur cible (y) au format 'one hot'
+        one_hot = np.zeros((y.size, max(y) + 1))
+        one_hot[np.arange(y.size), y] = 1
+
+        # Gradient de 'Weights1' & 'biases1'
+        d_layer_1 = np.dot((softmax - one_hot), Weights2.T)
+        d_relu_1  = np.where(layer_1 < 0 , 0, d_layer_1)
+        
+        dW1 = np.dot(X.T, d_relu_1) / y.size
+
+        db1 = np.sum(d_relu_1, axis=0) / y.size
+
+        # Gradient de 'Weights2' & 'biases2'
+        dW2 = np.dot(relu_1.T, (softmax - one_hot)) / y.size
+
+        db2 = np.sum(softmax - one_hot, axis=0) / y.size
+
+        # Ajouter le terme de regularisation
+        grads['W1'] = dW1 + 2 * reg * Weights1
+        grads['W2'] = dW2 + 2 * reg * Weights2
+        grads['b1'] = db1 + 2 * reg * biases1
+        grads['b2'] = db2 + 2 * reg * biases2
+
         #############################################################################
         #                             FIN DE VOTRE CODE                             #
         #############################################################################
