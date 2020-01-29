@@ -89,11 +89,13 @@ class TwoLayerNeuralNet(object):
         # Couche cachée
         layer_1 = np.dot(X, Weights1) + biases1
         relu_1  = np.where(layer_1 < 0, 0, layer_1)
+        
         #print("layer_1 :", layer_1)
         #print("relu_1 :", relu_1)
 
         # Couche de sortie
         layer_2 = np.dot(relu_1, Weights2) + biases2
+        
         #print("layer_2 :", layer_2.shape)
 
         scores = layer_2
@@ -128,7 +130,7 @@ class TwoLayerNeuralNet(object):
         # Cross-entropy loss + terme de regularisation
         reg_l2 = reg * (np.linalg.norm(Weights1)**2 + np.linalg.norm(biases1)**2 + np.linalg.norm(Weights2)**2 + np.linalg.norm(biases2)**2)
         
-        loss = - np.sum(np.log(softmax[np.arange(y.shape[0]), y])) / y.shape[0] + reg_l2 
+        loss = - np.sum(np.log(softmax[np.arange(y.shape[0]), y])) / y.size + reg_l2 
         
         #print("terme de regularisation :", reg_l2)
         #print("loss :", loss)
@@ -153,14 +155,8 @@ class TwoLayerNeuralNet(object):
         #   f1  pre-activation of the 1st layer (N, H)
         #   a1  activation of the 1st layer (N, H)
 
-        #print("X :", X.shape)
-        #print("W1 :", Weights1.shape, "| b1 :", biases1.shape)
-        #print("W2 :", Weights2.shape, "| b2 :", biases2.shape)
-        #print("layer_1 :", layer_1.shape, "| layer_2 :", layer_2.shape)
-        #print(y)
-
         # Vecteur cible (y) au format 'one hot'
-        one_hot = np.zeros((y.size, max(y) + 1))
+        one_hot = np.zeros((y.size, C))
         one_hot[np.arange(y.size), y] = 1
 
         # Gradient de 'Weights1' & 'biases1'
@@ -227,6 +223,17 @@ class TwoLayerNeuralNet(object):
             # Stockez-les dans "data_batch" and "labels_batch" respectivement.      #
             #########################################################################
 
+            # Liste d'index genere aleatoirement
+            list_index = np.random.choice(num_train, batch_size)
+
+            # Recupere les donnees issues de X et y
+            data_batch = X[list_index]
+            labels_batch = y[list_index]
+
+            #print("list_index :", list_index.shape)
+            #print("data_batch :", data_batch.shape)
+            #print("labels_batch :", labels_batch.shape)
+
             #########################################################################
             #                            FIN DE VOTRE CODE                          #
             #########################################################################
@@ -243,6 +250,10 @@ class TwoLayerNeuralNet(object):
             # dictionnaire "grads" défini précédemment.                             #
             #########################################################################
 
+            self.params['W1'] += - learning_rate * grads['W1']
+            self.params['W2'] += - learning_rate * grads['W2']
+            self.params['b1'] += - learning_rate * grads['b1']
+            self.params['b2'] += - learning_rate * grads['b2']
 
             #########################################################################
             #                            FIN DE VOTRE CODE                          #
@@ -290,6 +301,15 @@ class TwoLayerNeuralNet(object):
         # Indice : vous pouvez appeler des fonctions déjà codées...               #
         ###########################################################################
 
+        # Recuperer la matrice de score
+        scores = self.loss(X)
+
+        # Softmax
+        exps = np.exp(scores)
+        softmax = exps / np.sum(exps, axis=1)[:,np.newaxis]
+        
+        # Recuperer l'indice de la plus grosse probabilite
+        y_pred = np.argmax(softmax, axis=1)
 
         ###########################################################################
         #                             FIN DE VOTRE CODE                           #
