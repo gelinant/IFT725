@@ -130,7 +130,7 @@ class TwoLayerNeuralNet(object):
         # Cross-entropy loss + terme de regularisation
         reg_l2 = reg * (np.linalg.norm(Weights1)**2 + np.linalg.norm(biases1)**2 + np.linalg.norm(Weights2)**2 + np.linalg.norm(biases2)**2)
         
-        loss = - np.sum(np.log(softmax[np.arange(y.shape[0]), y])) / y.size + reg_l2 
+        loss = - np.sum(np.log(softmax[np.arange(y.size), y])) / y.size + reg_l2 
         
         #print("terme de regularisation :", reg_l2)
         #print("loss :", loss)
