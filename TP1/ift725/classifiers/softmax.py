@@ -49,12 +49,12 @@ def softmax_naive_loss_function(W, X, y, reg):
 
       SM = np.array([])
       for j in range(C):
-        predict_SM = np.exp(predict[j])/np.sum(np.exp(predict))
+        predict_SM = np.exp(predict[j] - np.max(predict))/np.sum(np.exp(predict- np.max(predict)))
         SM = np.append(SM , predict_SM)
         #print(SM)
 
         # W et dW ont D dim en sortie donc on multiplie par le X en cours d'analyse pour que ca donne le bon 
-        dW[:,j] += (predict_SM - y[i])*X[i]
+        dW[:,j] += (predict_SM - (j == y[i]))*X[i]
 
       #SM = SM - np.max(SM)
 
@@ -62,7 +62,7 @@ def softmax_naive_loss_function(W, X, y, reg):
       # On va ensuite chercher la bonne valeur theorique pour cette donnée avec y[i]
       # Comme c'est la seule qui sera non nulle, 
       # on va chercher directement le log de la valeur de la classe qui aurait du etre trouvée
-      loss += - np.log(SM[y[i]]) + reg 
+      loss += - np.log(SM[y[i]]) + reg * np.linalg.norm(W**2)
 
     loss = loss / X.shape[0]
     dW = dW / X.shape[0]
@@ -104,15 +104,24 @@ def softmax_vectorized_loss_function(W, X, y, reg):
     loss = loss * 0
     dW = dW * 0
 
-    predict = np.dot(X,W)
-    SM = np.exp(predict) / np.sum(np.exp(predict),axis=0)
-    loss = np.sum(- np.log(SM[y])) + reg 
+    predict = np.dot(X, W)
+    SM = np.exp(predict - np.max(predict)) / np.sum(np.exp(predict - np.max(predict)),axis=1)[:,np.newaxis]
+    # print(SM.shape)
+    # print(y)
+    # y = y*np.identity(y.shape)
+    loss = np.sum(- np.log(SM[np.arange(y.size), y])) + reg * np.linalg.norm(W**2)
     loss = loss / X.shape[0]
 
-    dW = np.transpose(np.dot(np.transpose(SM) - y,X))
+    
+    dW = 0
+    onehot = np.zeros_like(SM)
+    onehot[np.arange(y.size), y] = 1
+    dW = np.dot(np.transpose(X), SM - onehot)
+
+    dW = dW / X.shape[0]
 
 
-    print(loss)
+    #print(loss)
 
 
 
