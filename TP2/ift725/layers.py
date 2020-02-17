@@ -34,7 +34,15 @@ def forward_fully_connected(x, w, b):
     #  Stockez le résultat dans out.                                            #
     # Vous devrez reformer les entrées en lignes.                               #
     #############################################################################
-
+    out = []
+    for data in x:
+      # data est de la forme (d_1, ..., d_k)
+      D = data.size
+      data_reshape = data.reshape(1,D)
+      out = np.append(out, np.dot(data_reshape, w)+b )
+    N = x.shape[0]
+    M = b.shape[0]
+    out = out.reshape(N,M)
     #############################################################################
     #                             FIN DE VOTRE CODE                             #
     #############################################################################
@@ -68,7 +76,7 @@ def backward_fully_connected(dout, cache):
     # TODO: Implémentez la rétropropagation pour une couche pleinement          #
     #  connectée.                                                               #
     #############################################################################
-
+    
     #############################################################################
     #                             FIN DE VOTRE CODE                             #
     #############################################################################
@@ -90,7 +98,7 @@ def forward_relu(x):
     #############################################################################
     # TODO: Implémentez la propagation pour une couche ReLU.                    #
     #############################################################################
-
+    out = np.where(x>0,x,0)
     #############################################################################
     #                             FIN DE VOTRE CODE                             #
     #############################################################################
