@@ -77,6 +77,14 @@ def backward_fully_connected(dout, cache):
     #  connectée.                                                               #
     #############################################################################
     
+    #print("x :", x.shape, "| w :", w.shape, "| b :", b.shape)
+
+    dx = np.dot(dout, w.T).reshape(x.shape)
+    dw = np.dot(x.reshape(10,6).T, dout)
+    db = np.sum(dout, axis=0)
+
+    #print("dx :", dx.shape, "| dw :", dw.shape, "| db :", db.shape)
+    
     #############################################################################
     #                             FIN DE VOTRE CODE                             #
     #############################################################################
