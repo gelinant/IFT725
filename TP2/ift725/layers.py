@@ -77,10 +77,10 @@ def backward_fully_connected(dout, cache):
     #  connectée.                                                               #
     #############################################################################
     
-    #print("x :", x.shape, "| w :", w.shape, "| b :", b.shape)
+    #print("x :", x.shape, "| w :", w.shape, "| b :", b.shape, "| dout :", dout.shape)
 
     dx = np.dot(dout, w.T).reshape(x.shape)
-    dw = np.dot(x.reshape(10,6).T, dout)
+    dw = np.dot(x.reshape(x.shape[0], x.shape[1]*x.shape[2]).T, dout)
     db = np.sum(dout, axis=0)
 
     #print("dx :", dx.shape, "| dw :", dw.shape, "| db :", db.shape)
@@ -573,6 +573,19 @@ def svm_loss(x, y):
     #       régularisation                                                      #
     #############################################################################
 
+    list_current_loss = 1 + x - x[np.arange(N), y][:, np.newaxis]
+    
+    # On enleve les cas ou c'est inferieur a 0
+    list_current_loss = np.where(list_current_loss > 0, list_current_loss, 0)
+    # On enleve les cas ou j = y[i]
+    list_current_loss[np.arange(N), y] = 0
+    
+    # Loss
+    loss = np.sum(list_current_loss)
+
+    # Moyenne pour l'ensemble des exemples
+    loss = loss / N
+
     #############################################################################
     #                             FIN DE VOTRE CODE                             #
     #############################################################################
@@ -604,13 +617,22 @@ def softmax_loss(x, y, scale=1.0):
     # TODO: La perte softmax en vous inspirant du tp1 mais sans régularisation  #
     #                                                                           #
     #############################################################################
+    N = x.shape[0]
 
+    # Softmax
+    exps = np.exp(x)
+    softmax = exps / np.sum(exps, axis=1)[:,np.newaxis]
+
+    # Loss
+    loss = - np.sum(np.log(softmax[np.arange(y.size), y])) / N
+
+    dx = softmax.copy()
 
     #############################################################################
     #                             FIN DE VOTRE CODE                             #
     #############################################################################
 
-    dx = probs.copy()
+    #dx = probs.copy()
     dx[np.arange(N), y] -= 1
     dx /= N
 
