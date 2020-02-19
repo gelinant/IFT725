@@ -34,13 +34,19 @@ def forward_fully_connected(x, w, b):
     #  Stockez le résultat dans out.                                            #
     # Vous devrez reformer les entrées en lignes.                               #
     #############################################################################
+    
+    out = []
+    for data in x:
+      # data est de la forme (d_1, ..., d_k)
+      D = data.size
+      data_reshape = data.reshape(1,D)
+      out = np.append(out, np.dot(data_reshape, w)+b )
+    N = x.shape[0]
+    M = b.shape[0]
+    out = out.reshape(N,M)
 
-    #print("x :", x.shape, "| w :", w.shape, "| b :", b.shape)
-
-    out = np.dot(x.reshape(x.shape[0], np.prod(x.shape[1:])), w) + b
-
-    #print("out :", out.shape)
-
+    #out = np.dot(x.reshape(x.shape[0], np.prod(x.shape[1:])), w) + b
+    
     #############################################################################
     #                             FIN DE VOTRE CODE                             #
     #############################################################################
@@ -74,7 +80,7 @@ def backward_fully_connected(dout, cache):
     # TODO: Implémentez la rétropropagation pour une couche pleinement          #
     #  connectée.                                                               #
     #############################################################################
-
+    
     #print("x :", x.shape, "| w :", w.shape, "| b :", b.shape, "| dout :", dout.shape)
 
     dx = np.dot(dout, w.T).reshape(x.shape)
@@ -82,7 +88,7 @@ def backward_fully_connected(dout, cache):
     db = np.sum(dout, axis=0)
 
     #print("dx :", dx.shape, "| dw :", dw.shape, "| db :", db.shape)
-
+    
     #############################################################################
     #                             FIN DE VOTRE CODE                             #
     #############################################################################
@@ -131,7 +137,7 @@ def backward_relu(dout, cache):
     #############################################################################
 
     dx = dout * cache
-
+    
     #############################################################################
     #                             FIN DE VOTRE CODE                             #
     #############################################################################
@@ -615,7 +621,7 @@ def softmax_loss(x, y, scale=1.0):
     # TODO: La perte softmax en vous inspirant du tp1 mais sans régularisation  #
     #                                                                           #
     #############################################################################
-
+    
     N = x.shape[0]
 
     # Softmax

@@ -95,7 +95,7 @@ class TwoLayerNeuralNet(object):
         #  deux couches.                                                           #
         #  NOTES: score est la sortie du réseau *SANS SOFTMAX*                     #
         ############################################################################
-
+        
         # Couche cachee
         layer_1, cache_layer_1 = forward_fully_connected(X, self.params['W1'], self.params['b1'])
         relu_1, cache_relu_1 = forward_relu(layer_1)
@@ -104,7 +104,7 @@ class TwoLayerNeuralNet(object):
         layer_2, cache_layer_2 = forward_fully_connected(relu_1, self.params['W2'], self.params['b2'])
 
         scores = layer_2
-
+        
         ############################################################################
         #                             FIN DE VOTRE CODE                            #
         ############################################################################
@@ -136,7 +136,7 @@ class TwoLayerNeuralNet(object):
         # Note, les gradients doivent être stochez dans le dictionnaire `grads`    #
         #       du type grads['W1']=...                                            #
         ############################################################################
-
+        
         # Softmax
         loss, dx = softmax_loss(scores, y)
 
@@ -155,7 +155,7 @@ class TwoLayerNeuralNet(object):
 
         loss += 0.5 * self.reg * (np.linalg.norm(self.params['W1'])**2 + np.linalg.norm(self.params['W2'])**2)
         #loss += 0.5*self.reg*np.sum(self.params['W1']**2) + 0.5*self.reg*np.sum(self.params['W2']**2)
-
+        
         ############################################################################
         #                             FIN DE VOTRE CODE                            #
         ############################################################################
