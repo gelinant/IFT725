@@ -55,9 +55,9 @@ class TwoLayerNeuralNet(object):
         # ...                                                                      #
         ############################################################################
 
-        self.params['W1'] = weight_scale * np.random.randn(input_dim, hidden_dim) 
+        self.params['W1'] = np.random.normal(0, weight_scale, input_dim * hidden_dim).reshape(input_dim, hidden_dim)
         self.params['b1'] = np.zeros(hidden_dim)
-        self.params['W2'] = weight_scale * np.random.randn(hidden_dim, num_classes) 
+        self.params['W2'] = np.random.normal(0, weight_scale, hidden_dim * num_classes).reshape(hidden_dim, num_classes) 
         self.params['b2'] = np.zeros(num_classes)
 
         ############################################################################
@@ -153,8 +153,7 @@ class TwoLayerNeuralNet(object):
         grads['W2'] = dw_layer_2 + 0.5 * self.reg * self.params['W2']
         grads['b2'] = db_layer_2 + 0.5 * self.reg * self.params['b2']
 
-        loss += 0.5 * self.reg * (np.linalg.norm(self.params['W1'])**2 + np.linalg.norm(self.params['W2'])**2)
-        #loss += 0.5*self.reg*np.sum(self.params['W1']**2) + 0.5*self.reg*np.sum(self.params['W2']**2)
+        loss += self.reg * (np.linalg.norm(self.params['W1'])**2 + np.linalg.norm(self.params['b1'])**2 + np.linalg.norm(self.params['W2'])**2 + np.linalg.norm(self.params['b2'])**2)
 
         ############################################################################
         #                             FIN DE VOTRE CODE                            #
