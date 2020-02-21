@@ -231,6 +231,30 @@ class FullyConnectedNeuralNet(object):
         #           self.params[param_name_b] = ...                                #
         ############################################################################
 
+        # Couche d'entree & Couches cachées
+        for i, hidden_dim in enumerate(hidden_dims):
+            if i == 0:
+                prev_hidden_dim = input_dim
+            else:
+                prev_hidden_dim = self.params[self.pn('W', i)].shape[1]
+
+            #print("prev :", prev_hidden_dim, "courant :", hidden_dim, "i + 1 :", i + 1)
+
+            param_name_W = self.pn('W', i + 1)
+            param_name_b = self.pn('b', i + 1)
+            self.params[param_name_W] = np.random.normal(0, weight_scale, prev_hidden_dim * hidden_dim).reshape(prev_hidden_dim, hidden_dim)
+            self.params[param_name_b] = np.zeros(hidden_dim)
+
+        # Couche de sortie 
+        prev_hidden_dim = self.params[self.pn('W', self.num_layers - 1)].shape[1]
+
+        #print("prev :", prev_hidden_dim, "courant :", num_classes, "i + 1 :", self.num_layers)
+
+        param_name_W = self.pn('W', self.num_layers)
+        param_name_b = self.pn('b', self.num_layers)
+        self.params[param_name_W] = np.random.normal(0, weight_scale, prev_hidden_dim * num_classes).reshape(prev_hidden_dim, num_classes)
+        self.params[param_name_b] = np.zeros(num_classes)
+        
         ############################################################################
         #                             FIN DE VOTRE CODE                            #
         ############################################################################
@@ -292,6 +316,29 @@ class FullyConnectedNeuralNet(object):
         # la deuxième couche de normalisation par lots, etc.                       #
         ############################################################################
 
+        #print("X :", X.shape)
+        layer = X
+        list_caches = {}
+
+        # Couches cachees
+        for i in range(self.num_layers - 1):
+            param_name_W = self.pn('W', i + 1)
+            param_name_b = self.pn('b', i + 1)
+
+            #print("W", i + 1, ":", self.params[param_name_W].shape)
+            
+            layer, list_caches[self.pn('layer', i + 1)] = forward_fully_connected(layer, self.params[param_name_W], self.params[param_name_b])
+        
+            layer, list_caches[self.pn('relu', i + 1)] = forward_relu(layer)
+
+        #Couche de sortie
+        param_name_W = self.pn('W', self.num_layers)
+        param_name_b = self.pn('b', self.num_layers)
+
+        layer, list_caches[self.pn('layer', self.num_layers)] = forward_fully_connected(layer, self.params[param_name_W], self.params[param_name_b])
+
+        scores = layer
+
         ############################################################################
         #                             FIN DE VOTRE CODE                            #
         ############################################################################
@@ -316,6 +363,34 @@ class FullyConnectedNeuralNet(object):
         # régularisation L2 inclus un facteur de 0.5 pour simplifier l'expression  #
         # pour le gradient.                                                        #
         ############################################################################
+
+        # Softmax
+        loss, dx = softmax_loss(scores, y)
+
+        # Retro-propagations
+        for i in range(self.num_layers - 1):
+            reverse_i = self.num_layers - i
+            #print("reverse_i :", reverse_i)
+
+            dx, dw, db = backward_fully_connected(dx, list_caches[self.pn('layer', reverse_i)])
+
+            grads[self.pn('W', reverse_i)] = dw + self.reg * self.params[self.pn('W', reverse_i)]
+            grads[self.pn('b', reverse_i)] = db + self.reg * self.params[self.pn('b', reverse_i)]
+            
+            dx = backward_relu(dx, list_caches[self.pn('relu', reverse_i - 1)])
+
+        # Retro-propagation 1ere couche
+        dx, dw, db = backward_fully_connected(dx, list_caches[self.pn('layer', 1)])
+
+        grads[self.pn('W', 1)] = dw + self.reg * self.params[self.pn('W', 1)]
+        grads[self.pn('b', 1)] = db + self.reg * self.params[self.pn('b', 1)]
+
+        for i in range(self.num_layers):
+            param_name_W = self.pn('W', i + 1)
+            param_name_b = self.pn('b', i + 1)
+
+            loss += 0.5 * self.reg * (np.linalg.norm(self.params[param_name_W])**2 + np.linalg.norm(self.params[param_name_b])**2)
+
 
         ############################################################################
         #                             FIN DE VOTRE CODE                            #
