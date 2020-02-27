@@ -71,6 +71,12 @@ def sgd_momentum(w, dw, config=None):
     # utiliser et mettre à jour la vitesse v.                                   #
     #############################################################################
 
+    v = config['momentum'] * v - config['learning_rate'] * dw
+    next_w = w + v
+
+    print("v :", v)
+    print("next_w :", w)
+
     #############################################################################
     #                             FIN DE VOTRE CODE                             #
     #############################################################################
@@ -104,6 +110,14 @@ def rmsprop(x, dx, config=None):
     # N'oubliez pas de mettre à jour la valeur cache stockée dans               #
     # config['cache'] (# Variable "m" dans les notes de cours)                  #
     #############################################################################
+    gamma = config.get('decay_rate')
+    
+    config['cache'] = gamma * config.get('cache') + (1 - gamma) * np.abs(dx)
+    #config['cache'] = gamma * config.get('cache') + (1 - gamma) * dx**2
+    next_x = x - (config.get('learning_rate') * dx) / (config.get('cache') + config.get('epsilon'))
+    #next_x = x - (config.get('learning_rate') * dx) / (np.sqrt(config.get('cache')) + config.get('epsilon'))
+
+    #config['cache'] = config.get('cache')**2
 
     #############################################################################
     #                             FIN DE VOTRE CODE                             #
