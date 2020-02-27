@@ -407,12 +407,46 @@ def forward_convolutional_naive(x, w, b, conv_param, verbose=0):
     # TODO: Implémentez la propagation pour la couche de convolution.           #
     # Astuces: vous pouvez utiliser la fonction np.pad pour le remplissage.     #
     #############################################################################
+    
+    cache = (x, w, b, conv_param)
 
+    N= x.shape[0]
+    H= x.shape[2]
+    W= x.shape[3]
+
+    F= w.shape[0]
+    HH = w.shape[2]
+    WW = w.shape[3]
+
+    stride  = conv_param["stride"]
+    pad = conv_param["pad"]
+
+    Hp = np.floor(1 + (H+2*pad -HH)/stride).astype(int)
+    Wp = np.floor(1 + (W + 2 * pad - WW) / stride).astype(int)
+
+    #print("HP ",Hp,", Wp ", Wp)
+    
+    out = np.zeros((N,F,Hp,Wp))
+    #On padde le x sur les dimensions x et y 
+    paddedX = np.pad(x,((0,0),(0,0),(pad, pad), (pad,pad)),"constant",constant_values=(0, 0))
+    
+    for image in range(N):
+      for filter in range(F):
+        for x in range(Hp):
+          decalX = x*stride
+          for y in range(Wp):
+            #On veut decaler du bon nombre à chaque étape de la convolution
+            decalY = y*stride
+            convol = paddedX[image,:, decalX:decalX+HH , decalY:decalY+WW]
+            # print(convol)
+            # np.sum(convol*w[filter])
+            out[image,filter,x,y] = np.sum(convol*w[filter]) + b[filter]
+    
 
     #############################################################################
     #                             FIN DE VOTRE CODE                             #
     #############################################################################
-    cache = None
+
 
     return out, cache
 
@@ -434,6 +468,43 @@ def backward_convolutional_naive(dout, cache):
     #############################################################################
     # TODO: Implémentez la rétropropagation pour la couche de convolution       #
     #############################################################################
+    x, w, b, conv_param = cache
+    N, F, Hp, Wp = dout.shape
+
+    HH = w.shape[2]
+    WW = w.shape[3]
+
+    dx = np.zeros_like(x)
+    dw = np.zeros_like(w)
+    db = np.zeros_like(b)
+
+    stride  = conv_param["stride"]
+    pad = conv_param["pad"]
+    # print(pad)
+
+    paddedX = np.pad(x,((0,0),(0,0),(pad, pad), (pad,pad)),"constant",constant_values=(0, 0))
+    paddedDX = np.pad(dx,((0,0),(0,0),(pad, pad), (pad,pad)),"constant",constant_values=(0, 0))
+
+    for image in range(N):
+      for filter in range(F):
+        for x in range(Hp):
+          decalX = x*stride
+          for y in range(Wp):
+            decalY = y*stride
+            do_xy = dout[image,filter,x,y]
+            
+            #Pour dx 
+            convolDeriv = paddedDX[image,:, decalX:decalX+HH , decalY:decalY+WW]
+            paddedDX[image,:, decalX:decalX+HH , decalY:decalY+WW] += w[filter] *do_xy
+
+            #Pour dw
+            convolOrig = paddedX[image,:, decalX:decalX+HH , decalY:decalY+WW]
+            dw[filter] += convolOrig * do_xy
+
+            #Poiur db
+            db[filter] += do_xy
+       
+    dx = paddedDX[:,:,pad:-pad,pad:-pad]
 
     #############################################################################
     #                             FIN DE VOTRE CODE                             #
