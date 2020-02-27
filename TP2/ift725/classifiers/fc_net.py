@@ -331,6 +331,9 @@ class FullyConnectedNeuralNet(object):
         
             layer, list_caches[self.pn('relu', i + 1)] = forward_relu(layer)
 
+            if self.use_dropout:
+                layer, list_caches[self.pn('dropout', i + 1)] = forward_inverted_dropout(layer, self.dropout_param)
+
         #Couche de sortie
         param_name_W = self.pn('W', self.num_layers)
         param_name_b = self.pn('b', self.num_layers)
@@ -377,6 +380,9 @@ class FullyConnectedNeuralNet(object):
             grads[self.pn('W', reverse_i)] = dw + self.reg * self.params[self.pn('W', reverse_i)]
             grads[self.pn('b', reverse_i)] = db + self.reg * self.params[self.pn('b', reverse_i)]
             
+            if self.use_dropout:
+                dx = backward_inverted_dropout(dx, list_caches[self.pn('dropout', reverse_i - 1)])
+
             dx = backward_relu(dx, list_caches[self.pn('relu', reverse_i - 1)])
 
         # Retro-propagation 1ere couche
