@@ -113,11 +113,7 @@ def rmsprop(x, dx, config=None):
     gamma = config.get('decay_rate')
     
     config['cache'] = gamma * config.get('cache') + (1 - gamma) * np.abs(dx)
-    #config['cache'] = gamma * config.get('cache') + (1 - gamma) * dx**2
     next_x = x - (config.get('learning_rate') * dx) / (config.get('cache') + config.get('epsilon'))
-    #next_x = x - (config.get('learning_rate') * dx) / (np.sqrt(config.get('cache')) + config.get('epsilon'))
-
-    #config['cache'] = config.get('cache')**2
 
     #############################################################################
     #                             FIN DE VOTRE CODE                             #
