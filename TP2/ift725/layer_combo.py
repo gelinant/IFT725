@@ -82,9 +82,9 @@ def forward_convolutional_relu_pool(x, w, b, conv_param, pool_param):
     #  Stockez le résultat dans out et cache.                                   #
     #############################################################################
     cache = [None,None,None]
-    out, cache[0] = forward_convolutional_naive(x,w,b,conv_param)
+    out, cache[0] = conv_forward_fast(x,w,b,conv_param)
     out,cache[1] = forward_relu(out)
-    out,cache[2] = forward_max_pooling_naive(x,pool_param)
+    out,cache[2] = max_pool_forward_fast(x,pool_param)
     
     #############################################################################
     # Fin de votre code                                                         #
@@ -105,9 +105,9 @@ def backward_convolutional_relu_pool(dout, cache):
     #  Stockez le résultat dans dx, dw et db                                    #
     #############################################################################
     # print(cache.shape)
-    dx = backward_max_pooling_naive(dout,cache[2])
+    dx = max_pool_backward_fast(dout,cache[2])
     dx = backward_relu(dx,cache[1])
-    dx, dw,db = backward_convolutional_naive(dx,cache[0])
+    dx, dw,db = conv_backward_fast(dx,cache[0])
     #############################################################################
     # Fin de votre code                                                         #
     #############################################################################
