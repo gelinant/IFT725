@@ -53,13 +53,14 @@ class ThreeLayerConvolutionalNet(object):
         # utilisez les clés 'W3' et 'b3' pour les poids et les biais de la couche  #
         # affine de sortie.                                                        #
         ############################################################################
-        self.params['W1'] = np.random.normal(0, weight_scale, input_dim * num_filters).reshape(input_dim, num_filters)
+        W1dim = (num_filters,input_dim[0],filter_size,filter_size)
+        self.params['W1'] = np.random.normal(0, weight_scale, W1dim ).astype(dtype=int)
         self.params['b1'] = np.zeros(num_filters)
 
-        self.params['W2'] = np.random.normal(0, weight_scale, num_filters * hidden_dim).reshape(num_filters, hidden_dim) 
+        self.params['W2'] = np.random.normal(0, weight_scale, hidden_dim).astype(dtype=int)
         self.params['b2'] = np.zeros(hidden_dim)
 
-        self.params['W3'] = np.random.normal(0, weight_scale, hidden_dim * num_classes).reshape(hidden_dim, num_classes) 
+        self.params['W3'] = np.random.normal(0, weight_scale,  num_classes).astype(dtype=int)
         self.params['b3'] = np.zeros(num_classes)
 
         ############################################################################
@@ -97,6 +98,7 @@ class ThreeLayerConvolutionalNet(object):
         #  variable scores.                                                        #
         ############################################################################
         # Couche de convolution
+        print(self.params['W1'])
         layer_1, cache_layer_1 = forward_convolutional_relu_pool(X, self.params['W1'], self.params['b1'],conv_param,pool_param)
         
         # Couche cachee
