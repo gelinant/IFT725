@@ -538,11 +538,45 @@ def forward_max_pooling_naive(x, pool_param):
     #############################################################################
     # TODO: Implémentez la propagation pour une couche de de max pooling        #
     #############################################################################
+    cache = (x, pool_param)
+    
+    N= x.shape[0]
+    C= x.shape[1]    
+    H= x.shape[2]
+    W= x.shape[3]
+
+    pool_height = pool_param["pool_height"]
+    pool_width = pool_param["pool_width"]
+    stride = pool_param["stride"]
+
+    Hp = np.floor(1 + (H-pool_height)/stride).astype(int)
+    Wp = np.floor(1 + (W-pool_width) / stride).astype(int)
+    
+    out = np.zeros((N, C, Hp, Wp))
+
+    for image in range(N):
+      for c in range(C):
+        for x_loc in range(Hp):
+          decalX = x_loc*stride
+          for y_loc in range(Wp):
+            #On veut decaler du bon nombre à chaque étape de la convolution
+            decalY = y_loc*stride
+            poolArea = x[image, c, decalX:decalX+pool_height, decalY:decalY+pool_width]
+            # print(poolArea.shape)
+            out[image,c,x_loc,y_loc] = np.max(poolArea)
+    
+
+
+
+
+
+
+
+
 
     #############################################################################
     #                             FIN DE VOTRE CODE                             #
     #############################################################################
-    cache = None
     return out, cache
 
 
@@ -561,6 +595,36 @@ def backward_max_pooling_naive(dout, cache):
     #############################################################################
     # TODO: Implémentez la rétropropagation pour une couche de max pooling.     #
     #############################################################################
+    x, pool_param = cache
+
+    N= x.shape[0]
+    C= x.shape[1]    
+    H= x.shape[2]
+    W= x.shape[3]
+
+    pool_height = pool_param["pool_height"]
+    pool_width = pool_param["pool_width"]
+    stride = pool_param["stride"]
+
+    Hp = np.floor(1 + (H-pool_height)/stride).astype(int)
+    Wp = np.floor(1 + (W-pool_width) / stride).astype(int)
+    
+    dx = np.zeros_like(x)
+
+    for image in range(N):
+      for c in range(C):
+        for x_loc in range(Hp):
+          decalX = x_loc*stride
+          for y_loc in range(Wp):
+            decalY = y_loc*stride
+            do_xy = dout[image,c,x_loc,y_loc]
+
+            # On cherche la cellule pour laquelle le max est atteint
+            poolArea = x[image, c, decalX:decalX+pool_height, decalY:decalY+pool_width]
+            dx[image, c, decalX:decalX+pool_height, decalY:decalY+pool_width]  = np.where(poolArea == np.max(poolArea), do_xy,0)
+
+
+
 
     #############################################################################
     #                             FIN DE VOTRE CODE                             #
