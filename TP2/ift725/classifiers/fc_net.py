@@ -246,6 +246,8 @@ class FullyConnectedNeuralNet(object):
             self.params[param_name_b] = np.zeros(hidden_dim)
 
             if self.use_batchnorm:
+                #print("prev :", prev_hidden_dim, "courant :", hidden_dim, "i + 1 :", i + 1)
+
                 param_name_gamma = self.pn('gamma', i + 1)
                 param_name_beta  = self.pn('beta', i + 1)
                 self.params[param_name_gamma] = np.ones(hidden_dim)
@@ -398,10 +400,7 @@ class FullyConnectedNeuralNet(object):
             dx = backward_relu(dx, list_caches[self.pn('relu', reverse_i - 1)])
 
             if self.use_batchnorm:
-                gamma = grads[self.pn('gamma', reverse_i - 1)]
-                beta  = grads[self.pn('beta', reverse_i - 1)]
-
-                dx, gamma, beta = backward_batch_normalization(dx, list_caches[self.pn('batchnorm', reverse_i - 1)])
+                dx, grads[self.pn('gamma', reverse_i - 1)], grads[self.pn('beta', reverse_i - 1)] = backward_batch_normalization(dx, list_caches[self.pn('batchnorm', reverse_i - 1)])
 
         # Retro-propagation 1ere couche
         dx, dw, db = backward_fully_connected(dx, list_caches[self.pn('layer', 1)])
