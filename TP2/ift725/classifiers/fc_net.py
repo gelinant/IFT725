@@ -245,6 +245,12 @@ class FullyConnectedNeuralNet(object):
             self.params[param_name_W] = np.random.normal(0, weight_scale, prev_hidden_dim * hidden_dim).reshape(prev_hidden_dim, hidden_dim)
             self.params[param_name_b] = np.zeros(hidden_dim)
 
+            if self.use_batchnorm:
+                param_name_gamma = self.pn('gamma', i + 1)
+                param_name_beta  = self.pn('beta', i + 1)
+                self.params[param_name_gamma] = np.ones(hidden_dim)
+                self.params[param_name_beta]  = np.zeros(hidden_dim)
+
         # Couche de sortie 
         prev_hidden_dim = self.params[self.pn('W', self.num_layers - 1)].shape[1]
 
@@ -329,6 +335,12 @@ class FullyConnectedNeuralNet(object):
             
             layer, list_caches[self.pn('layer', i + 1)] = forward_fully_connected(layer, self.params[param_name_W], self.params[param_name_b])
         
+            if self.use_batchnorm:
+                gamma = self.params[self.pn('gamma', i + 1)]
+                beta  = self.params[self.pn('beta', i + 1)]
+
+                layer, list_caches[self.pn('batchnorm', i + 1)] = forward_batch_normalization(layer, gamma, beta, self.bn_params[i])
+
             layer, list_caches[self.pn('relu', i + 1)] = forward_relu(layer)
 
             if self.use_dropout:
@@ -384,6 +396,12 @@ class FullyConnectedNeuralNet(object):
                 dx = backward_inverted_dropout(dx, list_caches[self.pn('dropout', reverse_i - 1)])
 
             dx = backward_relu(dx, list_caches[self.pn('relu', reverse_i - 1)])
+
+            if self.use_batchnorm:
+                gamma = grads[self.pn('gamma', reverse_i - 1)]
+                beta  = grads[self.pn('beta', reverse_i - 1)]
+
+                dx, gamma, beta = backward_batch_normalization(dx, list_caches[self.pn('batchnorm', reverse_i - 1)])
 
         # Retro-propagation 1ere couche
         dx, dw, db = backward_fully_connected(dx, list_caches[self.pn('layer', 1)])
