@@ -384,6 +384,12 @@ class FullyConnectedNeuralNet(object):
         # Softmax
         loss, dx = softmax_loss(scores, y)
 
+        for i in range(self.num_layers):
+            param_name_W = self.pn('W', i + 1)
+            param_name_b = self.pn('b', i + 1)
+
+            loss += 0.5 * self.reg * (np.linalg.norm(self.params[param_name_W])**2 + np.linalg.norm(self.params[param_name_b])**2)
+
         # Retro-propagations
         for i in range(self.num_layers - 1):
             reverse_i = self.num_layers - i
@@ -407,12 +413,6 @@ class FullyConnectedNeuralNet(object):
 
         grads[self.pn('W', 1)] = dw + self.reg * self.params[self.pn('W', 1)]
         grads[self.pn('b', 1)] = db + self.reg * self.params[self.pn('b', 1)]
-
-        for i in range(self.num_layers):
-            param_name_W = self.pn('W', i + 1)
-            param_name_b = self.pn('b', i + 1)
-
-            loss += 0.5 * self.reg * (np.linalg.norm(self.params[param_name_W])**2 + np.linalg.norm(self.params[param_name_b])**2)
 
 
         ############################################################################
