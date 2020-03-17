@@ -84,14 +84,55 @@ if __name__ == "__main__":
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
+    # Cas de l'augmentation de donnees
+    degrees = 10
+    size = 32
+
+    acdc_augment_transform = transforms.Compose([
+        # Rotation aleatoire de quelques degres (10)
+        transforms.RandomRotation(degrees),
+        # Variation des contrastes et des couleurs 
+        transforms.ColorJitter(),
+        # Flip horizontal aleatoire
+        transforms.RandomHorizontalFlip(),
+        # Crop aleatoire
+        transforms.RandomCrop(size),
+
+        transforms.ToTensor()
+    ])
+
+    augment_transform = transforms.Compose([
+        # Rotation aleatoire de quelques degres (10)
+        transforms.RandomRotation(degrees),
+        # Variation des contrastes et des couleurs 
+        transforms.ColorJitter(),
+        # Flip horizontal aleatoire
+        transforms.RandomHorizontalFlip(),
+        # Crop aleatoire
+        transforms.RandomCrop(size),
+
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    ])
+
     if args.dataset == 'cifar10':
-        # Download the train and test set and apply transform on it
-        train_set = datasets.CIFAR10(root='../data', train=True, download=True, transform=base_transform)
+        if data_augment:
+            train_set = datasets.CIFAR10(root='../data', train=True, download=True, transform=augment_transform)
+        
+        else:
+            # Download the train and test set and apply transform on it
+            train_set = datasets.CIFAR10(root='../data', train=True, download=True, transform=base_transform)
+        
         test_set = datasets.CIFAR10(root='../data', train=False, download=True, transform=base_transform)
 
     elif args.dataset == 'svhn':
-        # Download the train and test set and apply transform on it
-        train_set = datasets.SVHN(root='../data', split='train', download=True, transform=base_transform)
+        if data_augment:
+            train_set = datasets.SVHN(root='../data', split='train', download=True, transform=augment_transform)
+        
+        else:
+            # Download the train and test set and apply transform on it
+            train_set = datasets.SVHN(root='../data', split='train', download=True, transform=base_transform)
+        
         test_set = datasets.SVHN(root='../data', split='test', download=True, transform=base_transform)
 
     if args.optimizer == 'SGD':
@@ -113,7 +154,12 @@ if __name__ == "__main__":
         model = UNet(num_classes=4)
         args.dataset = 'acdc'
 
-        train_set = HDF5Dataset('train', hdf5_file, transform=acdc_base_transform)
+        if data_augment:
+            train_set = HDF5Dataset('train', hdf5_file, transform=acdc_augment_transform)
+        
+        else:
+            train_set = HDF5Dataset('train', hdf5_file, transform=acdc_base_transform)
+
         test_set = HDF5Dataset('test', hdf5_file, transform=acdc_base_transform)
 
     model_trainer = CNNTrainTestManager(model=model,
