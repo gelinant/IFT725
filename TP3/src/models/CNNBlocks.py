@@ -55,14 +55,14 @@ class DenseBlock(nn.Module):
     to reduce it to out_channels and sum it up to the original input,
     """
 
-    def __init__(self, in_channels,out_channels):
+    def __init__(self, in_channels,mid_channels):
         super(DenseBlock, self).__init__()
         self.bn1 = nn.BatchNorm2d(in_channels)
-        self.conv1 = nn.Conv2d(in_channels, 32, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv1 = nn.Conv2d(in_channels, mid_channels, kernel_size=3, stride=1, padding=1, bias=False)
 
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv2 = nn.Conv2d(mid_channels, mid_channels, kernel_size=3, stride=1, padding=1, bias=False)
         
-        self.conv3 = nn.Conv2d(96, out_channels, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv3 = nn.Conv2d(mid_channels, in_channels, kernel_size=3, stride=1, padding=1, bias=False)
 
    
 
