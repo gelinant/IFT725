@@ -89,28 +89,28 @@ class ÌFT725UNet(CNNBaseModel):
 		
         encode_block_30 = self.conv_encoder4(encode_pool_20)
         encode_pool_30  = self.max_pool_encoder4(encode_block_30)
-		# ------------------------------------------------------------------
+	# ------------------------------------------------------------------
 		
-		# Central encode/decode --------------------------------------------
-		cat_layer_30    = self.conv_decoder3(encode_block_30)
-		encode_block_21 = torch.cat((cat_layer_30, encode_block_20), 1) 
-		
-		cat_layer_20    = self.conv_decoder3(encode_block_20)
-		encode_block_11 = torch.cat((cat_layer_20, encode_block_10), 1)
-		cat_layer_21    = self.conv_decoder3(encode_block_21)
-		encode_block_12 = torch.cat((cat_layer_21, encode_block_11, encode_block_10), 1)
-		
-		cat_layer_10    = self.conv_decoder3(encode_block_10)
-		encode_block_01 = torch.cat((cat_layer_10, encode_block_00), 1)
-		cat_layer_11    = self.conv_decoder3(encode_block_11)
-		encode_block_02 = torch.cat((cat_layer_11, encode_block_01, encode_block_00), 1)
-		cat_layer_12    = self.conv_decoder3(encode_block_12)
-		encode_block_03 = torch.cat((cat_layer_12, encode_block_02, encode_block_01, encode_block_00), 1)
-		# ------------------------------------------------------------------
+	# Central encode/decode --------------------------------------------
+	cat_layer_30    = self.conv_decoder3(encode_block_30)
+	encode_block_21 = torch.cat((cat_layer_30, encode_block_20), 1) 
+
+	cat_layer_20    = self.conv_decoder3(encode_block_20)
+	encode_block_11 = torch.cat((cat_layer_20, encode_block_10), 1)
+	cat_layer_21    = self.conv_decoder3(encode_block_21)
+	encode_block_12 = torch.cat((cat_layer_21, encode_block_11, encode_block_10), 1)
+
+	cat_layer_10    = self.conv_decoder3(encode_block_10)
+	encode_block_01 = torch.cat((cat_layer_10, encode_block_00), 1)
+	cat_layer_11    = self.conv_decoder3(encode_block_11)
+	encode_block_02 = torch.cat((cat_layer_11, encode_block_01, encode_block_00), 1)
+	cat_layer_12    = self.conv_decoder3(encode_block_12)
+	encode_block_03 = torch.cat((cat_layer_12, encode_block_02, encode_block_01, encode_block_00), 1)
+	# ------------------------------------------------------------------
 
         # Transitional block -----------------------------------------------
         middle_block    = self.transitional_block(encode_pool_30)
-		# ------------------------------------------------------------------
+	# ------------------------------------------------------------------
 
         # Decode -----------------------------------------------------------
         decode_block_31 = torch.cat((middle_block, encode_block_30), 1)
@@ -122,10 +122,10 @@ class ÌFT725UNet(CNNBaseModel):
         decode_block_13 = torch.cat((cat_layer_22, encode_block_12, encode_block_11,encode_block_10), 1)
         cat_layer_13    = self.conv_decoder2(decode_block_13)
         
-		decode_block_04 = torch.cat((cat_layer_13, encode_block_03, encode_block_02, encode_block_01, encode_block_00), 1)
+	decode_block_04 = torch.cat((cat_layer_13, encode_block_03, encode_block_02, encode_block_01, encode_block_00), 1)
         final_layer = self.final_layer(decode_block_04)
-		final_layer += encode_block_01 + encode_block_02 + encode_block_03
-		# ------------------------------------------------------------------
+	final_layer += encode_block_01 + encode_block_02 + encode_block_03
+	# ------------------------------------------------------------------
 		
         return final_layer
 
