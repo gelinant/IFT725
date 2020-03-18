@@ -11,6 +11,7 @@ Other: Suggestions are welcome
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.cat
 
 
 class ResidualBlock(nn.Module):
