@@ -53,27 +53,27 @@ class IFT725Net(CNNBaseModel):
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
         )
-        self.conv3 = DenseBlock(32,32)
-        self.conv4 = ResidualBlock(32,32)
-        self.conv5 = BottleneckBlock(32,32)
-        self.FCL= nn.Sequential(
-            nn.Linear(32,500),
+
+        self.conv3 = DenseBlock(64, 64, 2)
+        self.conv4 = ResidualBlock(128, 256, 2)
+        self.conv5 = BottleneckBlock(256, 32, 256, 2)
+        
+        self.FCL   = nn.Sequential(
+            nn.Linear(256 * 4 * 4, num_classes),
             nn.ReLU(inplace=True)
         )
-
-
-
+    
     def forward(self, x):
         c1 = self.conv1(x)
-        c2 = self.conv2(x)
-        c2_dense  = self.conv3(c1,c2)
-        c3 = self.conv4(c2_dense)
-        c4 = self.conv5(c3)
-        c5 = self.FCL(c4)
-        return c5
+        c2 = self.conv2(c1)
+        
+        c3 = self.conv3(c2)
+        c4 = self.conv4(c3)
+        c5 = self.conv5(c4)
+        
+        output = self.FCL(c5.view(c5.size(0), -1))
 
-
-
+        return output
 
 '''
 FIN DE VOTRE CODE
