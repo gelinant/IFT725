@@ -58,10 +58,7 @@ class IFT725Net(CNNBaseModel):
         self.conv4 = ResidualBlock(128, 256, 2)
         self.conv5 = BottleneckBlock(256, 32, 256, 2)
         
-        self.FCL   = nn.Sequential(
-            nn.Linear(256 * 4 * 4, num_classes),
-            nn.ReLU(inplace=True)
-        )
+        self.FCL   = nn.Linear(256 * 4 * 4, num_classes)
     
     def forward(self, x):
         c1 = self.conv1(x)
